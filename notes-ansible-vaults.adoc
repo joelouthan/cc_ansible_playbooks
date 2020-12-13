@@ -1,0 +1,23 @@
+== Solarwinds
+ansible-vault encrypt_string --name cc_sw_password --ask-vault-pass
+
+== JIRA
+
+curl -u opsansible:FR33wh33l -X GET -H "Content-Type: application/json" https://jira-stg.freewheel.tv/rest/api/2/issue/createmeta
+
+ansible-vault encrypt_string --name cc_jira_password --ask-vault-pass
+iDRiM5K0gv4g9
+ansible localhost -m ansible.builtin.debug -a var="cc_jira_password" -e "@hosts/000_shared_yml"
+
+project: OPS
+issuetype: Ops-Task
+jira_uri: https://jira-stg.freewheel.tv
+jira_username: opsansible
+jira_password: FR33wh33l
+jira_password: !vault |
+          $ANSIBLE_VAULT;1.1;AES256
+          64343630366337323436366233336265626639373266326433393635366432356231363963386130
+          6438323762613532363138356433336635326432376137360a343630613138623966623765333262
+          66333865393934343130613536373164323063663430613437656435333630323232343263376431
+          3861653335386530300a663437306262333439356133663331336334356134626261306634333530
+          6564
