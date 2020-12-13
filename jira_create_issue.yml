@@ -1,0 +1,16 @@
+---
+- name: JIRA - Create Issue
+  hosts: localhost
+  connection: local
+  gather_facts: true
+
+  tasks:
+  - name: Include jira role and create_issue tasks
+    include_role:
+      name: jira
+      tasks_from: create_issue
+    vars:
+      jira_username: "{{ cc_jira_username }}"
+      jira_password: "{{ cc_jira_password }}"
+      jira_uri: "{{ cc_jira_uri }}"
+...
