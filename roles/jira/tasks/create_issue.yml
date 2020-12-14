@@ -1,9 +1,9 @@
 ---
 - name: Create an issue
   jira:
-    uri: "{{ jira_uri }}"
-    username: "{{ jira_username }}"
-    password: "{{ jira_password }}"
+    uri: "{{ cc_jira_uri }}"
+    username: "{{ cc_jira_username }}"
+    password: "{{ cc_jira_password }}"
     project: OPS
     operation: create
     summary: "Testing Ansible Tower to JIRA {{ ansible_date_time.iso8601 }}"
