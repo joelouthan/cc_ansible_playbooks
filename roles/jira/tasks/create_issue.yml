@@ -10,4 +10,5 @@
     description: "Created using Ansible"
     issuetype: Ops-Task
   register: issue
+  debugger: on_failed
 ...
