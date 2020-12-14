@@ -1,4 +1,3 @@
----
 cc_jira_uri: https://jira-stg.freewheel.tv
 cc_jira_username: opsansible
 cc_jira_password: !vault |
@@ -8,4 +7,3 @@ cc_jira_password: !vault |
                   33313830646537333261616439336438363937306333346365393737383139333365313939393233
                   3330666665326335370a396438636666636235373235663237366236383030366539636262613433
                   6433
-...
