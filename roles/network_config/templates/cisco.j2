@@ -1,0 +1,41 @@
+vlan {{ vlan_id }}
+  name {{ aws_acct_name }}#{{ aws_acct_num}}
+interface port-channel20.{{ vlan_id }} build
+  description {{ aws_acct_name }}#{{ aws_acct_num}} build
+  encapsulation dot1q {{ vlan_id }} build
+  bfd interval 300 min_rx 300 multiplier 3
+  ip address {{ ip_address_bgp }}
+  no shutdown
+ip prefix-list bgp-to-eigrp permit {{ ip_address_bgp_to_eigrp }}
+ip prefix-list {{ aws_acct_shortname }}-INBOUND seq 5 permit {{ ip_address_bgp_to_eigrp }}
+ip prefix-list {{ aws_acct_shortname }}-OUTBOUND seq 5 permit 10.0.1.0/24
+ip prefix-list {{ aws_acct_shortname }}-OUTBOUND seq 10 permit 10.0.11.0/24
+ip prefix-list {{ aws_acct_shortname }}-OUTBOUND seq 15 permit 10.0.12.0/23
+ip prefix-list {{ aws_acct_shortname }}-OUTBOUND seq 20 permit 10.2.0.0/16
+ip prefix-list {{ aws_acct_shortname }}-OUTBOUND seq 25 permit 192.168.0.0/24
+ip prefix-list {{ aws_acct_shortname }}-OUTBOUND seq 30 permit 172.31.255.1/32
+ip prefix-list {{ aws_acct_shortname }}-OUTBOUND seq 35 permit 172.31.255.2/32
+ip prefix-list {{ aws_acct_shortname }}-OUTBOUND seq 40 permit 172.31.255.3/32
+ip prefix-list {{ aws_acct_shortname }}-OUTBOUND seq 45 permit 172.31.255.4/32
+ip prefix-list {{ aws_acct_shortname }}-OUTBOUND seq 50 permit 172.31.255.5/32
+ip prefix-list {{ aws_acct_shortname }}-OUTBOUND seq 55 permit 172.31.255.6/32
+ip prefix-list {{ aws_acct_shortname }}-OUTBOUND seq 60 permit 192.168.10.0/23
+ip prefix-list {{ aws_acct_shortname }}-OUTBOUND seq 65 permit 192.168.12.0/23
+ip prefix-list {{ aws_acct_shortname }}-OUTBOUND seq 70 permit 192.168.14.0/23
+ip prefix-list {{ aws_acct_shortname }}-OUTBOUND seq 75 permit 192.168.16.0/23
+// ip prefix-list {{ aws_acct_shortname }}-OUTBOUND seq 80 permit 10.13.0.0/17 
+route-map {{ aws_acct_shortname }}-INBOUND permit 5
+  match ip address prefix-list {{ aws_acct_shortname }}-INBOUND
+route-map {{ aws_acct_shortname }}-OUTBOUND permit 5
+  match ip address prefix-list {{ aws_acct_shortname }}-OUTBOUND
+  set community {{ community }}
+router bgp 26558
+ neighbor {{ neighbor }}
+   remote-as {{ remote-as }}
+    password {{ remote-as_password }}
+    address-family ipv4 unicast
+      send-community
+      route-map {{ aws_acct_shortname }}-INBOUND in
+      route-map {{ aws_acct_shortname }}-OUTBOUND out
+      default-originate
+      soft-reconfiguration inbound always
