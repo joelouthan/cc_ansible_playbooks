@@ -1,0 +1,387 @@
+set system auto-snapshot
+set system domain-name alaskaair.com
+set system domain-search alaskaair.com
+set system time-zone America/Los_Angeles
+set system no-redirects
+set system arp aging-timer 5
+set system authentication-order tacplus
+set system authentication-order password
+set system root-authentication encrypted-password "$6$pskZXLT6$fs0AgQbGXW5f2XPjeGpN8UhpTn3LTPlO4x8XPxPq23qxT9gG73HUnIgLGGLWeLJ2xbZLW9i/oA0f6MfXZjnWl."
+set system name-server 159.49.42.254
+set system name-server 10.70.112.254
+set system tacplus-server 10.33.130.5 secret "$9$CsTHpIhMWx7VwApcyleLXUjiqTzCA0cyehcVs2aGU/CA0crlKW"
+set system tacplus-server 10.33.130.5 timeout 10
+set system tacplus-server 10.33.130.5 single-connection
+set system tacplus-server 10.33.130.5 source-address {{station_net_24_prefix_11}}.129
+set system tacplus-server 10.23.130.5 secret "$9$cj7rWXsYoaUjSrxNdVg4QF3/uOcSexNVXxUikPTQEcSex-dbY"
+set system tacplus-server 10.23.130.5 timeout 10
+set system tacplus-server 10.23.130.5 single-connection
+set system tacplus-server 10.23.130.5 source-address {{station_net_24_prefix_11}}.129
+set system accounting events login
+set system accounting events change-log
+set system accounting events interactive-commands
+set system accounting destination tacplus
+set system login message "*****************************************************************\n* NOTICE  NOTICE            S T O P              NOTICE  NOTICE *\n*              THIS IS A PRIVATE NETWORK DEVICE.                *\n*      AUTHORIZATION IS REQUIRED TO CONNECT TO THIS DEVICE.     *\n* ACTUAL OR ATTEMPTED USE, ACCESS, EXAMINATION OR CONFIGURATION *\n* CHANGE BY ANY UNAUTHORIZED PERSON WILL RESULT IN CRIMINAL AND *\n*     CIVIL PROSECUTION TO THE FULLEST EXTENT OF THE LAW.       *\n*                  N    O    T    I    C    E                   *\n*****************************************************************"
+set system login class super-user-local idle-timeout 15
+set system login class super-user-local permissions all
+set system login class super-user-remote idle-timeout 15
+set system login class super-user-remote permissions all
+set system login user FIELD_SYS uid 2004
+set system login user FIELD_SYS class read-only
+set system login user NET_ADMINS uid 2001
+set system login user NET_ADMINS class super-user-remote
+set system login user RO_NET uid 2005
+set system login user RO_NET class read-only
+set system login user netadm uid 2000
+set system login user netadm class super-user-local
+set system login user netadm authentication encrypted-password "$6$/4DeF4ti$L0OgzQmoYSQT7qHe52piVQY88MAfOzilDGRSihBO8cVYDyFgJ6Zl2ClB/WPDx.NC4Pch3QhBflCETCs1lH7Pq/"
+set system services ssh protocol-version v2
+set system services netconf ssh
+set system syslog user * any emergency
+set system syslog host 10.23.139.15 port 1528
+set system syslog file messages any notice
+set system syslog file messages authorization info
+set system syslog file interactive-commands interactive-commands any
+set system syslog source-address {{station_net_24_prefix_11}}.129
+set system commit synchronize
+set system ntp server 10.20.0.1
+set system ntp server 10.30.0.1
+!
+set chassis alarm management-ethernet link-down ignore
+set chassis cluster reth-count 5
+set chassis cluster redundancy-group 0 node 0 priority 250
+set chassis cluster redundancy-group 0 node 1 priority 127
+set chassis cluster redundancy-group 1 node 0 priority 250
+set chassis cluster redundancy-group 1 node 1 priority 127
+set chassis cluster redundancy-group 1 interface-monitor ge-0/0/3 weight 255
+set chassis cluster redundancy-group 1 interface-monitor ge-5/0/3 weight 255
+!
+set services rpm probe Canarys test Canary-1 target address 159.49.164.72
+set services rpm probe Canarys test Canary-1 probe-count 3
+set services rpm probe Canarys test Canary-1 probe-interval 3
+set services rpm probe Canarys test Canary-1 thresholds successive-loss 3
+set services rpm probe Canarys test Canary-1 destination-interface reth1.993
+set services rpm probe Canarys test Canary-1 hardware-timestamp
+set services rpm probe Canarys test Canary-2 target address 159.49.228.72
+set services rpm probe Canarys test Canary-2 probe-count 3
+set services rpm probe Canarys test Canary-2 probe-interval 3
+set services rpm probe Canarys test Canary-2 thresholds successive-loss 3
+set services rpm probe Canarys test Canary-2 destination-interface reth1.993
+set services rpm probe Canarys test Canary-2 hardware-timestamp
+set security log mode stream
+set security log report
+!
+set security address-book MGMT-Access address MGMT-1 159.49.0.0/16
+set security address-book MGMT-Access address MGMT-2 10.0.0.0/8
+set security address-book MGMT-Access address MGMT-3 172.16.0.0/12
+set security address-book MGMT-Access attach zone trust
+set security address-book global address DX-Transit_1 {{station_net_24_prefix_11}}.164/32
+set security address-book global address MGMT-1 159.49.0.0/16
+set security address-book global address MGMT-3 172.16.0.0/12
+set security address-book global address MGMT-2 10.0.0.0/8
+set security address-book global address Station-MGMT {{station_net_24_prefix_11}}.0/25
+set security address-book global address-set Internet-NAT address DX-Transit_1
+set security alg dns disable
+set security alg rtsp disable
+set security alg sip disable
+set security alg ftp disable
+set security alg tftp disable
+set security flow tcp-mss ipsec-vpn mss 1350
+set security screen ids-option untrust-screen icmp ping-death
+set security screen ids-option untrust-screen ip source-route-option
+set security screen ids-option untrust-screen ip tear-drop
+set security screen ids-option untrust-screen tcp syn-flood alarm-threshold 1024
+set security screen ids-option untrust-screen tcp syn-flood attack-threshold 200
+set security screen ids-option untrust-screen tcp syn-flood source-threshold 1024
+set security screen ids-option untrust-screen tcp syn-flood destination-threshold 2048
+set security screen ids-option untrust-screen tcp syn-flood timeout 20
+set security screen ids-option untrust-screen tcp land
+!
+set security nat source rule-set Internet from interface reth1.995
+set security nat source rule-set Internet to interface reth1.993
+set security nat source rule-set Internet rule source-nat-rule match source-address 0.0.0.0/0
+set security nat source rule-set Internet rule source-nat-rule match source-address-name Internet-NAT
+set security nat source rule-set Internet rule source-nat-rule then source-nat interface
+!
+set security policies from-zone Internet-ISP to-zone Internet-vDOM-outer policy Internet_source_filter match source-address any
+set security policies from-zone Internet-ISP to-zone Internet-vDOM-outer policy Internet_source_filter match destination-address any
+set security policies from-zone Internet-ISP to-zone Internet-vDOM-outer policy Internet_source_filter match application any
+set security policies from-zone Internet-ISP to-zone Internet-vDOM-outer policy Internet_source_filter then deny
+set security policies from-zone trust to-zone mgmt policy mgmt-access-allow match source-address MGMT-1
+set security policies from-zone trust to-zone mgmt policy mgmt-access-allow match source-address MGMT-2
+set security policies from-zone trust to-zone mgmt policy mgmt-access-allow match source-address MGMT-3
+set security policies from-zone trust to-zone mgmt policy mgmt-access-allow match destination-address Station-MGMT
+set security policies from-zone trust to-zone mgmt policy mgmt-access-allow match application any
+set security policies from-zone trust to-zone mgmt policy mgmt-access-allow then permit
+!
+set security policies from-zone trust to-zone mgmt policy mgmt-access-deny match source-address any
+set security policies from-zone trust to-zone mgmt policy mgmt-access-deny match destination-address any
+set security policies from-zone trust to-zone mgmt policy mgmt-access-deny match application any
+set security policies from-zone trust to-zone mgmt policy mgmt-access-deny then deny
+set security policies default-policy permit-all
+!
+set security zones security-zone Internet-vDOM-outer host-inbound-traffic system-services all
+set security zones security-zone Internet-vDOM-outer host-inbound-traffic protocols all
+set security zones security-zone Internet-vDOM-outer interfaces reth1.995
+!
+set security zones security-zone trust host-inbound-traffic system-services all
+set security zones security-zone trust host-inbound-traffic protocols all
+!
+set security zones security-zone trust interfaces reth1.991
+set security zones security-zone trust interfaces ge-0/0/2.0
+set security zones security-zone trust interfaces lo0.0
+set security zones security-zone trust interfaces ge-5/0/2.0
+!
+set security zones security-zone Internet-ISP screen untrust-screen
+set security zones security-zone Internet-ISP host-inbound-traffic system-services ike
+set security zones security-zone Internet-ISP host-inbound-traffic system-services ntp
+set security zones security-zone Internet-ISP host-inbound-traffic system-services ping
+set security zones security-zone Internet-ISP host-inbound-traffic system-services dhcp
+set security zones security-zone Internet-ISP interfaces reth1.993
+!
+set security zones security-zone mgmt host-inbound-traffic system-services ping
+set security zones security-zone mgmt host-inbound-traffic system-services ssh
+set security zones security-zone mgmt host-inbound-traffic system-services snmp
+set security zones security-zone mgmt host-inbound-traffic system-services traceroute
+!
+set security zones security-zone mgmt interfaces reth1.990
+!
+set interfaces ge-0/0/2 description “{{mpls_a_interface_desc}}”
+set interfaces ge-0/0/2 unit 0 family inet sampling input
+set interfaces ge-0/0/2 unit 0 family inet sampling output
+set interfaces ge-0/0/2 unit 0 family inet address {{mpls_a_interface_addr}}/30
+!
+set interfaces ge-0/0/3 ether-options redundant-parent reth1
+set interfaces ge-0/0/3 description “To {{sitecode}}-{{mdf_subloc}}-cs-1 Gi0/0/1”
+!
+set interfaces ge-5/0/2 description “{{mpls_b_interface_desc}}”
+set interfaces ge-5/0/2 unit 0 family inet sampling input
+set interfaces ge-5/0/2 unit 0 family inet sampling output
+set interfaces ge-5/0/2 unit 0 family inet address {{mpls_b_interface_addr}}/30
+!
+set interfaces ge-5/0/3 ether-options redundant-parent reth1
+set interfaces ge-5/0/3 description “To {{sitecode}}-{{mdf_subloc}}-cs-1 Gi1/0/1”
+!
+set interfaces ge-0/0/0 description Fabric-Control-Interface
+set interfaces ge-5/0/0 description Fabric-Control-Interface
+!
+set interfaces lo0 unit 0 family inet address {{station_net_24_prefix_11}}.129/32
+set interfaces reth1 vlan-tagging
+set interfaces reth1 redundant-ether-options redundancy-group 1
+set interfaces reth1 unit 990 description Network-Management
+set interfaces reth1 unit 990 vlan-id 990
+set interfaces reth1 unit 990 family inet address {{station_net_24_prefix_11}}.1/25
+set interfaces reth1 unit 991 description Transit
+set interfaces reth1 unit 991 vlan-id 991
+set interfaces reth1 unit 991 family inet address {{station_net_24_prefix_11}}.145/28
+set interfaces reth1 unit 993 description Broadband
+set interfaces reth1 unit 993 vlan-id 993
+set interfaces reth1 unit 993 family inet dhcp-client lease-time 86400
+set interfaces reth1 unit 993 family inet dhcp-client retransmission-attempt 6
+set interfaces reth1 unit 993 family inet dhcp-client retransmission-interval 5
+set interfaces reth1 unit 993 family inet dhcp-client vendor-id ether
+set interfaces reth1 unit 993 family inet dhcp-client options no-hostname
+set interfaces reth1 unit 993 family inet sampling input
+set interfaces reth1 unit 993 family inet sampling output
+!set interfaces reth1 unit 993 family inet address {{broadband_router_a_subif_ip}}/{{broadband_public_prefix_length}}
+!
+set interfaces reth1 unit 995 description DX-Transit
+set interfaces reth1 unit 995 vlan-id 995
+set interfaces reth1 unit 995 family inet address {{station_net_24_prefix_11}}.161/28
+!
+set snmp location "{{snmplocation}}"
+set snmp contact Network-Operations-Center
+set snmp community "N3tM0n!T0r!nG" authorization read-only
+set snmp community "N3tM0n!T0r!nG" client-list-name snmp_allowed
+set snmp community n3tw0rk1 authorization read-only
+set snmp community n3tw0rk1 client-list-name snmp_allowed
+set snmp community network authorization read-only
+set snmp community network client-list-name snmp_allowed
+set snmp community AG153psn authorization read-only
+set snmp community AG153psn client-list-name snmp_allowed
+set snmp trap-options source-address {{station_net_24_prefix_11}}.129
+set snmp trap-group "N3tM0n!T0r!nG" version v2
+set snmp trap-group "N3tM0n!T0r!nG" categories authentication
+set snmp trap-group "N3tM0n!T0r!nG" categories link
+set snmp trap-group "N3tM0n!T0r!nG" targets 10.23.130.30
+set snmp trap-group "N3tM0n!T0r!nG" targets 10.23.130.33
+set snmp trap-group "N3tM0n!T0r!nG" targets 10.23.130.55
+set snmp trap-group "N3tM0n!T0r!nG" targets 10.33.130.33
+set snmp trap-group "N3tM0n!T0r!nG" targets 10.33.130.30
+set snmp trap-group "N3tM0n!T0r!nG" targets 10.33.130.55
+!
+set forwarding-options sampling input rate 100
+set forwarding-options sampling family inet output flow-server 10.23.130.24 port 2055
+set forwarding-options sampling family inet output flow-server 10.23.130.24 source-address {{station_net_24_prefix_11}}.129
+set forwarding-options sampling family inet output flow-server 10.23.130.24 version 5
+set forwarding-options sampling family inet output flow-server 10.33.130.24 port 2055
+set forwarding-options sampling family inet output flow-server 10.33.130.24 source-address {{station_net_24_prefix_11}}.129
+set forwarding-options sampling family inet output flow-server 10.33.130.24 version 5
+set forwarding-options sampling family inet output flow-server 10.70.112.124 port 2055
+set forwarding-options sampling family inet output flow-server 10.70.112.124 source-address {{station_net_24_prefix_11}}.129
+set forwarding-options sampling family inet output flow-server 10.70.112.124 version 5
+set forwarding-options sampling family inet output flow-server 159.49.42.77 port 2055
+set forwarding-options sampling family inet output flow-server 159.49.42.77 source-address {{station_net_24_prefix_11}}.129
+set forwarding-options sampling family inet output flow-server 159.49.42.77 version 5
+!
+set event-options policy Dead_Canary-1 events ping_probe_failed
+set event-options policy Dead_Canary-1 within 10 trigger on
+set event-options policy Dead_Canary-1 within 10 trigger 2
+set event-options policy Dead_Canary-1 within 10 events ping_probe_failed
+set event-options policy Dead_Canary-1 attributes-match "{$$.test-name}" matches Canary-2
+set event-options policy Dead_Canary-1 attributes-match "{$ping_probe_failed.test-name}" matches Canary-1
+set event-options policy Dead_Canary-1 then change-configuration commands "deactivate routing-options static route 0.0.0.0/0"
+set event-options policy Dead_Canary-1 then change-configuration commands "activate routing-options static route 159.49.164.72/32"
+set event-options policy Dead_Canary-1 then change-configuration commands "activate routing-options static route 159.49.228.72/32"
+set event-options policy Dead_Canary-1 then change-configuration commands "activate event-options policy Alive_Canary"
+set event-options policy Dead_Canary-1 then change-configuration commands "deactivate event-options policy Dead_Canary-2"
+set event-options policy Dead_Canary-1 then change-configuration commands "deactivate event-options policy Dead_Canary-1"
+set event-options policy Dead_Canary-2 events ping_probe_failed
+set event-options policy Dead_Canary-2 within 10 trigger on
+set event-options policy Dead_Canary-2 within 10 trigger 2
+set event-options policy Dead_Canary-2 within 10 events ping_probe_failed
+set event-options policy Dead_Canary-2 attributes-match "{$$.test-name}" matches Canary-1
+set event-options policy Dead_Canary-2 attributes-match "{$ping_probe_failed.test-name}" matches Canary-2
+set event-options policy Dead_Canary-2 then change-configuration commands "deactivate routing-options static route 0.0.0.0/0"
+set event-options policy Dead_Canary-2 then change-configuration commands "activate routing-options static route 159.49.164.72/32"
+set event-options policy Dead_Canary-2 then change-configuration commands "activate routing-options static route 159.49.228.72/32"
+set event-options policy Dead_Canary-2 then change-configuration commands "activate event-options policy Alive_Canary"
+set event-options policy Dead_Canary-2 then change-configuration commands "deactivate event-options policy Dead_Canary-1"
+set event-options policy Dead_Canary-2 then change-configuration commands "deactivate event-options policy Dead_Canary-2"
+set event-options policy Alive_Canary events ping_test_completed
+set event-options policy Alive_Canary attributes-match ping_test_completed.test-owner matches Canarys
+set event-options policy Alive_Canary then change-configuration commands "activate routing-options static route 0.0.0.0/0"
+set event-options policy Alive_Canary then change-configuration commands "deactivate routing-options static route 159.49.164.72/32"
+set event-options policy Alive_Canary then change-configuration commands "deactivate routing-options static route 159.49.228.72/32"
+set event-options policy Alive_Canary then change-configuration commands "activate event-options policy Dead_Canary-1"
+set event-options policy Alive_Canary then change-configuration commands "activate event-options policy Dead_Canary-2"
+set event-options policy Alive_Canary then change-configuration commands "deactivate event-options policy Alive_Canary"
+deactivate event-options policy Alive_Canary
+set event-options traceoptions file EVENT
+set event-options traceoptions file size 500k
+set event-options traceoptions file files 2
+set event-options traceoptions flag all
+!
+set routing-options static route {{station_net_24_prefix_1}}.0/21 next-hop {{station_net_24_prefix_11}}.149
+!set routing-options static route {{legacy_subnet_addr_1}}/{{legacy_subnet_prefixlen_1}} next-hop {{station_net_24_prefix_11}}.149
+!set routing-options static route {{legacy_subnet_addr_2}}/{{legacy_subnet_prefixlen_2}} next-hop {{station_net_24_prefix_11}}.149
+!set routing-options static route {{legacy_subnet_addr_3}}/{{legacy_subnet_prefixlen_3}} next-hop {{station_net_24_prefix_11}}.149
+!
+set routing-options static route {{station_net_24_prefix_11}}.143/32 next-hop {{station_net_24_prefix_11}}.148
+set routing-options static route 159.49.46.18/32 next-hop {{station_net_24_prefix_11}}.148
+set routing-options static route 159.49.241.18/32 next-hop {{station_net_24_prefix_11}}.148
+set routing-options static route 0.0.0.0/0 next-hop {{station_net_24_prefix_11}}.148
+deactivate routing-options static route 159.49.164.72/32
+set routing-options static route 159.49.228.72/32 next-hop {{station_net_24_prefix_11}}.148
+deactivate routing-options static route 159.49.228.72/32
+!
+!set routing-options static route {{cuse_dmz_subnet}}/{{cuse_dmz_prefixlen}} next-hop {{station_net_24_prefix_11}}.148
+!
+set routing-options router-id {{station_net_24_prefix_11}}.129
+set routing-options autonomous-system {{bgp_as_number}}
+set protocols bgp path-selection cisco-non-deterministic
+set protocols bgp log-updown
+!
+set protocols bgp group ATT-WAN type external
+set protocols bgp group ATT-WAN import mpls-in
+set protocols bgp group ATT-WAN export mpls-out
+set protocols bgp group ATT-WAN peer-as {{mpls_a_as_number}}
+set protocols bgp group ATT-WAN neighbor {{mpls_a_bgp_remote_ip}}
+set protocols bgp group ATT-WAN neighbor {{mpls_b_bgp_remote_ip}}
+!
+set protocols l2-learning global-mode switching
+set protocols lldp interface all
+set protocols rstp interface all
+set policy-options prefix-list pfx-corp 10.0.0.0/8
+set policy-options prefix-list pfx-corp 151.193.141.0/24
+set policy-options prefix-list pfx-corp 159.49.0.0/16
+set policy-options prefix-list pfx-corp 172.16.0.0/12
+set policy-options prefix-list pfx-corp 192.168.0.0/16
+set policy-options prefix-list pfx-default 0.0.0.0/0
+set policy-options prefix-list pfx-{{sitecode}} {{station_net_24_prefix_1}}.0/20
+!set policy-options prefix-list pfx-{{sitecode}} {{legacy_subnet_addr_1}}/{{legacy_subnet_prefixlen_1}}
+!set policy-options prefix-list pfx-{{sitecode}} {{legacy_subnet_addr_2}}/{{legacy_subnet_prefixlen_2}}
+!set policy-options prefix-list pfx-{{sitecode}} {{legacy_subnet_addr_3}}/{{legacy_subnet_prefixlen_3}}
+!
+set policy-options prefix-list snmp_allowed 10.23.130.0/24
+set policy-options prefix-list snmp_allowed 10.33.130.0/24
+set policy-options prefix-list snmp_allowed 10.70.112.124/32
+set policy-options prefix-list snmp_allowed 10.70.112.135/32
+set policy-options prefix-list snmp_allowed 159.49.42.34/32
+set policy-options prefix-list snmp_allowed 159.49.42.77/32
+set policy-options prefix-list snmp_allowed 159.49.42.90/32
+set policy-options prefix-list snmp_allowed 159.49.42.91/32
+set policy-options prefix-list snmp_allowed 159.49.153.0/24
+!
+!set policy-options prefix-list pfx-{{sitecode}}-cuse {{cuse_dmz_subnet}}/{{cuse_dmz_prefixlen}}
+!
+set policy-options policy-statement ACCEPT then accept
+set policy-options policy-statement REJECT then reject
+set policy-options policy-statement bgp-policies-mpls-import term next-hop-self then next-hop self
+set policy-options policy-statement bgp-policies-mpls-import term next-hop-self then next term
+set policy-options policy-statement bgp-policies-mpls-import term explicit-default-action then next policy
+set policy-options policy-statement bgp-policies-tunnel-export term term-1 from policy ( ! tunnel-out )
+set policy-options policy-statement bgp-policies-tunnel-export term term-1 then reject
+set policy-options policy-statement bgp-policies-tunnel-export term strip-communities then community delete all
+set policy-options policy-statement bgp-policies-tunnel-export term strip-communities then next term
+set policy-options policy-statement bgp-policies-tunnel-export term explicit-default-action then next policy
+set policy-options policy-statement bgp-policies-tunnel-import term term-1 from policy ( ! tunnel-in )
+set policy-options policy-statement bgp-policies-tunnel-import term term-1 then reject
+set policy-options policy-statement bgp-redistributes term static from protocol static
+set policy-options policy-statement bgp-redistributes term static from policy static-to-bgp
+set policy-options policy-statement bgp-redistributes term static then accept
+set policy-options policy-statement bgp-redistributes term sourced-bgp-network from route-filter {{station_net_24_prefix_11}}.129/32 exact
+set policy-options policy-statement bgp-redistributes term sourced-bgp-network then accept
+set policy-options policy-statement bgp-redistributes term from-bgp from protocol bgp
+set policy-options policy-statement bgp-redistributes term from-bgp then next policy
+set policy-options policy-statement bgp-redistributes term ios-implicit-deny then reject
+set policy-options policy-statement mpls-in term term-1 from prefix-list pfx-{{sitecode}}
+set policy-options policy-statement mpls-in term term-1 then reject
+set policy-options policy-statement mpls-in term term-2 then local-preference 120
+set policy-options policy-statement mpls-in term term-2 then community set mpls-in
+set policy-options policy-statement mpls-in term term-2 then accept
+set policy-options policy-statement mpls-out term 1 from protocol direct
+set policy-options policy-statement mpls-out term 1 from protocol static
+set policy-options policy-statement mpls-out term 1 from prefix-list pfx-{{sitecode}}
+!set policy-options policy-statement mpls-out term 1 from prefix-list pfx-{{sitecode}}-cuse
+set policy-options policy-statement mpls-out term 1 then accept
+set policy-options policy-statement mpls-out term ios-implicit-deny then reject
+set policy-options policy-statement pfx-corp term term-1 from route-filter 159.49.0.0/16 orlonger
+set policy-options policy-statement pfx-corp term term-1 from route-filter 10.0.0.0/8 orlonger
+set policy-options policy-statement pfx-corp term term-1 from route-filter 172.16.0.0/12 orlonger
+set policy-options policy-statement pfx-corp term term-1 from route-filter 192.168.0.0/16 orlonger
+set policy-options policy-statement pfx-corp term term-1 from route-filter 151.193.141.0/24 orlonger
+set policy-options policy-statement pfx-corp term term-1 then accept
+set policy-options policy-statement pfx-corp term ios-implicit-deny then reject
+set policy-options policy-statement pfx-default term term-1 from route-filter 0.0.0.0/0 exact
+set policy-options policy-statement pfx-default term term-1 then accept
+set policy-options policy-statement pfx-default term ios-implicit-deny then reject
+set policy-options policy-statement pfx-{{sitecode}} term term-1 from route-filter {{station_net_24_prefix_1}}.0/20 orlonger
+set policy-options policy-statement pfx-{{sitecode}} term term-1 then accept
+set policy-options policy-statement pfx-{{sitecode}} term ios-implicit-deny then reject
+set policy-options policy-statement static-to-bgp term term-1 from policy pfx-{{sitecode}}
+set policy-options policy-statement static-to-bgp term term-1 then accept
+set policy-options policy-statement static-to-bgp term ios-implicit-deny then reject
+!
+set policy-options community all members *:*
+set policy-options community mpls-in members no-export
+set policy-options community tunnel-in members no-export
+!
+set policy-options as-path path-99-reject .*
+set firewall filter from_internet term 1 from source-address 159.49.228.72/32
+set firewall filter from_internet term 1 from source-address 159.49.164.72/32
+set firewall filter from_internet term 1 from protocol udp
+set firewall filter from_internet term 1 from protocol esp
+set firewall filter from_internet term 1 from protocol ah
+set firewall filter from_internet term 1 from destination-port 500
+set firewall filter from_internet term 1 from destination-port 4500
+set firewall filter from_internet term 1 then accept
+set firewall filter from_internet term 2 from protocol udp
+set firewall filter from_internet term 2 from destination-port bootpc
+set firewall filter from_internet term 2 then accept
+set firewall filter local-networks term 1 from source-address {{station_net_24_prefix_11}}.164/32
+!
+set routing-instances Internet instance-type virtual-router
+set routing-instances Internet interface reth1.993
+set routing-instances Internet interface reth1.995
+set routing-instances Internet interface st0.0

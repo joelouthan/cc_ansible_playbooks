@@ -1,0 +1,588 @@
+{{sitecode}}-{{mdf_subloc}}-wr-1 4321
+
+
+no ip finger
+no service pad
+service timestamps debug datetime msec localtime show-timezone
+service timestamps log datetime msec localtime show-timezone
+service password-encryption
+!
+hostname {{sitecode}}-{{mdf_subloc}}-wr-1
+!
+no logging console
+enable secret 5 $1$hOHB$6elYawIuV5vKVx3Q0a0Fj.
+
+
+username netadm privilege 15 secret 5 $1$sQ2n$P6k3ew4E5Y/r/rfXhjyOP.
+
+!
+aaa new-model
+!
+aaa group server tacacs+ ACS
+ server name se4vvacs01
+ server name igqvvacs01
+ ip tacacs source-interface Loopback0
+!
+aaa authentication password-prompt "Cisco ACS Unavailable - Local Password: "
+aaa authentication username-prompt "Cisco ACS Unavailable - Local UserName: "
+aaa authentication login default group ACS local
+aaa authentication login console local
+aaa authentication enable default group ACS enable
+aaa authorization exec default group ACS local 
+aaa authorization commands 0 default local group ACS 
+aaa authorization commands 1 default local group ACS 
+aaa authorization commands 15 default local group ACS 
+aaa accounting update newinfo
+aaa accounting exec default start-stop broadcast group ACS
+aaa accounting commands 1 default start-stop broadcast group ACS
+aaa accounting commands 15 default start-stop broadcast group ACS
+!
+aaa session-id common
+!
+clock timezone PST -8 0
+clock summer-time PDT recurring
+!
+ip vrf Internet
+ rd {{bgp_as_number}}:1
+!
+ip domain list alaskaair.com
+ip domain list horizonair.com
+no ip domain lookup
+ip domain name alaskaair.com
+ip name-server 159.49.42.254
+ip name-server 10.70.112.254
+!
+crypto key generate rsa general-keys modulus 2048
+!
+!
+!
+crypto pki trustpoint mytp
+ enrollment terminal pem
+ revocation-check none
+ rsakeypair mytp
+!
+!
+crypto ikev2 proposal ikev2-proposal 
+ encryption aes-cbc-128
+ integrity sha256
+ group 14
+!
+crypto ikev2 policy ikev2-policy 
+ match fvrf Internet
+ proposal ikev2-proposal
+!
+crypto ikev2 profile ikev2-profile
+ match identity remote fqdn seavvvpn01.alaskaair.com
+ identity local fqdn {{sitecode}}-{{mdf_subloc}}-wr-1.alaskaair.com
+ authentication remote rsa-sig
+ authentication local rsa-sig
+ match fvrf Internet
+ pki trustpoint mytp
+ dpd 10 2 periodic
+!
+crypto ikev2 nat keepalive 60
+crypto ikev2 fragmentation mtu 900
+!
+ip ssh version 2
+ip scp server enable
+! 
+crypto ipsec transform-set tset esp-aes esp-sha256-hmac 
+ mode tunnel
+!
+crypto ipsec profile ipsec-profile
+ set transform-set tset 
+ set ikev2-profile ikev2-profile
+!
+ip access-list extended from_internet
+ permit udp host 159.49.241.8 any eq isakmp
+ permit udp host 159.49.241.8 any eq non500-isakmp
+ permit esp host 159.49.241.8 any
+ permit udp any any eq bootpc
+ permit tcp any any range 1024 65535
+ deny udp any 224.0.0.0 15.255.255.255
+ permit udp any any range 1024 65535
+ permit icmp any any
+ deny   ip any any
+!
+interface Loopback0
+ description Router loopback
+ ip address {{station_net_24_prefix_11}}.129 255.255.255.255
+!
+interface Loopback1
+ description Tunnel loopback
+ ip address {{station_net_24_prefix_11}}.130 255.255.255.255
+!
+flow exporter e1
+ destination 159.49.42.77
+ source Loopback0
+ transport udp 2055
+ export-protocol netflow-v5
+!
+flow exporter e2
+ destination 10.70.112.124
+ source Loopback0
+ transport udp 2055
+ export-protocol netflow-v5
+!
+flow exporter e3
+destination 10.23.130.24
+source Loopback0
+transport udp 2055
+export-protocol netflow-v5
+!
+flow exporter e4
+destination 10.33.130.24
+source Loopback0
+transport udp 2055
+export-protocol netflow-v5
+!
+flow monitor m1
+ exporter e1
+ exporter e2
+ exporter e3
+ exporter e4
+ record netflow ipv4 original-input peer
+!
+interface Tunnel0
+ description Tunnel to seavvvpn01
+ ip unnumbered Loopback1
+ tunnel source GigabitEthernet0/0/1.993
+ tunnel mode ipsec ipv4
+ tunnel destination 159.49.241.8
+ tunnel protection ipsec profile ipsec-profile
+ ip tcp adjust-mss 1400
+ tunnel vrf Internet
+ ip flow monitor m1 input
+ ip flow monitor m1 output
+!
+interface GigabitEthernet0/0/1
+ description To {{sitecode}}-{{mdf_subloc}}-cs-1 Gi1/0/2
+ no ip address
+ no shutdown
+!
+interface GigabitEthernet0/0/1.990
+ description Network Management
+ encapsulation dot1Q 990
+ ip address {{station_net_24_prefix_11}}.2 255.255.255.128
+ standby 90 ip {{station_net_24_prefix_11}}.1
+ standby 90 priority 120
+ standby 90 preempt
+ ip helper-address 159.49.42.254
+ ip helper-address 10.70.112.254
+!
+interface GigabitEthernet0/0/1.991
+ description Transit
+ encapsulation dot1Q 991
+ ip address {{station_net_24_prefix_11}}.146 255.255.255.240
+ standby 91 ip {{station_net_24_prefix_11}}.145
+ standby 91 priority 120
+ standby 91 preempt
+!
+
+interface GigabitEthernet0/0/1.993
+ ip vrf forwarding Internet
+ description Broadband
+ encapsulation dot1Q 993
+ ip address dhcp
+ ip nat outside
+ ip access-group from_internet in
+ ip flow monitor m1 input
+ ip flow monitor m1 output
+!
+interface GigabitEthernet0/0/1.995
+ ip vrf forwarding Internet
+ description DX-Transit
+ encapsulation dot1Q 995
+ ip address {{station_net_24_prefix_11}}.162 255.255.255.240
+ ip nat inside
+ standby 95 ip {{station_net_24_prefix_11}}.161
+ standby 95 priority 120
+ standby 95 preempt
+
+
+! Ethernet MPLS Placeholder (Always Apply)
+interface GigabitEthernet0/0/0
+ description Reserved for Ethernet MPLS (future)
+ shutdown
+
+! [Begin] Ethernet MPLS Config. Uncomment if you are using an Ethernet MPLS hand-off
+
+! Ethernet MPLS Config (Apply only if using Ethernet MPLS hand-off)
+!interface GigabitEthernet0/0/0
+! description {{mpls_a_interface_desc}}
+! ip address {{mpls_a_interface_addr}} 255.255.255.252
+! ip flow monitor m1 input
+! ip flow monitor m1 output
+! media-type rj45
+! media-type sfp
+! load-interval 30
+! no shutdown
+
+! [End] Ethernet MPLS Config. 
+
+! [Begin] Single T1 MPLS Config. Uncomment if you are using a single MPLS T1 (not Multilink)
+
+!card type t1 0 1
+!
+!controller T1 0/1/0
+! framing esf
+! linecode b8zs
+! channel-group 0 timeslots 1-24
+! description controller for S0/1/0
+
+!interface Serial0/1/0:0
+! bandwidth 1536
+! description {{mpls_a_interface_desc}}
+! ip address {{mpls_a_interface_addr}} 255.255.255.252
+! ip flow monitor m1 input
+! ip flow monitor m1 output
+! encapsulation ppp
+! load-interval 30
+! no shutdown
+
+! [End] Single T1 MPLS Config.
+
+! [Begin] Multilink T1 MPLS Config.Uncomment if you are using a Multilink MPLS T1
+
+!card type t1 0 1
+
+!controller T1 0/1/0
+! framing esf
+! linecode b8zs
+! channel-group 0 timeslots 1-24
+! description controller for S0/1/0
+
+!controller T1 0/1/1
+! framing esf
+! linecode b8zs
+! channel-group 0 timeslots 1-24
+! description controller for S0/1/1
+
+!interface Multilink1
+! description MPLS T1 Multilink: {{mpls_a_neighbor_desc}}
+! ip address {{mpls_a_interface_addr}} 255.255.255.252
+! ip flow monitor m1 input
+! ip flow monitor m1 output
+! load-interval 30
+! ppp multilink
+! ppp multilink group 1
+! no shutdown
+
+!interface Serial0/1/0:0
+! description {{mpls_a_interface_desc}}
+! bandwidth 1536
+! no ip address
+! encapsulation ppp
+! load-interval 30
+! ppp multilink
+! ppp multilink group 1
+! no shutdown
+
+!interface Serial0/1/0:0
+! description {{mpls_a_interface_2_desc}}
+! bandwidth 1536
+! no ip address
+! encapsulation ppp
+! load-interval 30
+! ppp multilink
+! ppp multilink group 1
+! no shutdown
+
+! [End] Multilink T1 MPLS Config.
+
+!
+router ospf 2
+ log-adjacency-changes detail
+ passive-interface default
+ no passive-interface Tunnel0
+ network {{station_net_24_prefix_11}}.130 0.0.0.0 area 0
+!
+
+!
+no ip http server
+no ip http secure-server
+
+! [Begin] Health Check Config for DX-Internet
+!
+
+! Track reachability of canary-a
+ip sla 10
+ icmp-echo 159.49.46.18 source-ip {{station_net_24_prefix_11}}.146
+ threshold 1000
+ timeout 2000
+ frequency 30
+ip sla schedule 10 life forever start-time now
+
+! Track reachability of canary-b
+ip sla 11
+ icmp-echo 159.49.241.18 source-ip {{station_net_24_prefix_11}}.146
+ threshold 1000
+ timeout 2000
+ frequency 30
+ip sla schedule 11 life forever start-time now
+
+! Define tracked objects for IP SLA pollers
+track 10 ip sla 10 reachability
+ delay up 120
+!
+track 11 ip sla 11 reachability
+ delay up 120
+
+! Define Boolean OR tracked object containing all canary objects
+track 1 list boolean or
+ object 10
+ object 11
+
+!
+! [End] Health Check Config for DX-Internet
+
+
+
+! [Begin] Static Routes
+!
+
+! **Station proprietary routes. Forward to CS-1. Networks not in FW bypass will be forwarded to Inner firewall from there.**
+! Uncomment lines for legacy subnets (secondaries) if they are being used.
+ip route {{station_net_24_prefix_1}}.0 255.255.240.0 {{station_net_24_prefix_11}}.150 name {{sitecode}}_Aggregate_via_{{sitecode}}-{{mdf_subloc}}-cs-1
+!ip route {{legacy_subnet_addr_1}} {{legacy_subnet_netmask_1}} {{station_net_24_prefix_11}}.150 name {{sitecode}}_Legacy_via_{{sitecode}}-{{mdf_subloc}}-cs-1
+!ip route {{legacy_subnet_addr_2}} {{legacy_subnet_netmask_2}} {{station_net_24_prefix_11}}.150 name {{sitecode}}_Legacy_via_{{sitecode}}-{{mdf_subloc}}-cs-1
+!ip route {{legacy_subnet_addr_3}} {{legacy_subnet_netmask_3}} {{station_net_24_prefix_11}}.150 name {{sitecode}}_Legacy_via_{{sitecode}}-{{mdf_subloc}}-cs-1
+
+! **Station common-use routes. Forward to Outer FW VDOM. Outer VDOM is L3-connected to common-use.**
+!ip route {{cuse_dmz_subnet}} {{cuse_dmz_netmask}} {{station_net_24_prefix_11}}.148 name cuse_dmz_via_fw_outer
+
+! ** Partner WAN router (WR-2) loopback interface. For management and iBGP peering.**
+ip route {{station_net_24_prefix_11}}.131 255.255.255.255 {{station_net_24_prefix_11}}.147 name {{sitecode}}-{{mdf_subloc}}-wr-2_lo0
+
+! **Routes supporting DX-Internet**
+
+! Tell the default VRF to reach the DX-Transit subnet via the Outer VDOM. This is not needed for normal traffic, but keeps dx-transit from being in a routing shadow.
+ip route {{station_net_24_prefix_11}}.160 255.255.255.240 {{station_net_24_prefix_11}}.148 name dx_transit_via_outer_fw
+! Tell the default VRF to reach canary-a via the Outer VDOM. 
+ip route 159.49.241.18 255.255.255.255 {{station_net_24_prefix_11}}.148 name canary_a_via_outer_fw
+! Tell the default VRF to reach canary-b via the Outer VDOM. 
+ip route 159.49.46.18 255.255.255.255 {{station_net_24_prefix_11}}.148 name canary_b_via_outer_fw
+! Fallback route for canary-a. This ensures the canary isn't inadvertently reached via an alternate path, in case the connected interface goes down. 
+ip route 159.49.241.18 255.255.255.255 Null0 250 name canary_a_failsafe
+! Fallback route for canary-b. This ensures the canary isn't inadvertently reached via an alternate path, in case the connected interface goes down. 
+ip route 159.49.46.18 255.255.255.255 Null0 250 name canary_b_failsafe
+! Internet-destined common-use traffic arriving from the outer fw needs to be SNATed to this IP. Adding this /32 route will tell the WR the SNAT IP is reachable via the outer vdom.
+! That way, response traffic can find its way back to common-use via the outer vdom.
+ip route {{station_net_24_prefix_11}}.143 255.255.255.255 {{station_net_24_prefix_11}}.148 name cuse_snat_via_outer_fw
+
+!
+! [End] Static Routes
+
+!
+ip tacacs source-interface Loopback0
+!
+ip prefix-list pfx-corp seq 10 permit 159.49.0.0/16
+ip prefix-list pfx-corp seq 20 permit 10.0.0.0/8
+ip prefix-list pfx-corp seq 30 permit 172.16.0.0/12
+ip prefix-list pfx-corp seq 40 permit 192.168.0.0/16
+ip prefix-list pfx-corp seq 50 permit 151.193.141.0/24
+!
+ip prefix-list pfx-default seq 10 permit 0.0.0.0/0
+!
+ip prefix-list pfx-{{sitecode}} seq 10 permit {{station_net_24_prefix_1}}.0/20
+!
+!ip prefix-list pfx-{{sitecode}} seq 20 permit {{legacy_subnet_addr_1}}/{{legacy_subnet_prefixlen_1}}
+!ip prefix-list pfx-{{sitecode}} seq 30 permit {{legacy_subnet_addr_2}}/{{legacy_subnet_prefixlen_2}}
+!ip prefix-list pfx-{{sitecode}} seq 40 permit {{legacy_subnet_addr_3}}/{{legacy_subnet_prefixlen_3}}
+!
+!ip prefix-list pfx-{{sitecode}}-cuse seq 10 permit {{cuse_dmz_subnet}}/{{cuse_dmz_prefixlen}}
+!
+logging buffered 16384 informational
+logging source-interface Loopback0
+logging host 10.70.112.121 transport udp port 20514
+logging 159.49.153.31
+logging origin-id hostname
+logging facility local0
+logging host 10.13.3.2 
+
+ip bgp-community new-format
+ip as-path access-list 99 deny .*
+!
+! Note: Only override local pref and perform AS prepend (on secondary) if you have two MPLS circuits of different 
+! capacity such that you need to make one MPLS circuit primary (on wr-1) and another secondary (on wr-2)
+! If MPLS circuits are equal speed/capacity and same provider, or if there is only one MPLS circuit, leave LP as
+! default (100) and do not prepend AS-PATH on secondary. This does not apply to tunnels, which should normally
+! have (reduced) LP set, in order to keep the tunnels as backup to MPLS.
+!
+route-map mpls-a-out permit 10
+ match ip address prefix-list pfx-{{sitecode}}
+
+!
+! route-map mpls-a-out permit 20
+! match ip address prefix-list pfx-{{sitecode}}-cuse
+!
+route-map mpls-a-in permit 10
+ !set local-preference 120
+ set community no-export
+!
+route-map tunnel-a-out permit 10
+ match ip address prefix-list pfx-{{sitecode}}
+ set as-path prepend {{bgp_as_number}} {{bgp_as_number}}
+!
+! route-map tunnel-a-out permit 20
+! match ip address prefix-list pfx-{{sitecode}}-cuse
+! set as-path prepend {{bgp_as_number}} {{bgp_as_number}}
+!
+route-map tunnel-a-in permit 10
+ set local-preference 90
+ set community no-export
+!
+route-map static-to-bgp permit 10
+ match ip address prefix-list pfx-{{sitecode}}
+!
+!route-map static-to-bgp permit 20
+! match ip address prefix-list pfx-{{sitecode}}-cuse
+!
+router bgp {{bgp_as_number}}
+ bgp log-neighbor-changes
+ network {{station_net_24_prefix_11}}.129 mask 255.255.255.255
+ redistribute static route-map static-to-bgp
+ neighbor {{station_net_24_prefix_11}}.131 remote-as {{bgp_as_number}}
+ neighbor {{station_net_24_prefix_11}}.131 description {{sitecode}}-{{mdf_subloc}}-wr-2 (iBGP)
+ neighbor {{station_net_24_prefix_11}}.131 update-source Loopback0
+ neighbor {{station_net_24_prefix_11}}.131 send-community
+ neighbor {{station_net_24_prefix_11}}.131 soft-reconfiguration inbound
+ neighbor {{station_net_24_prefix_11}}.131 next-hop-self
+ neighbor {{station_net_24_prefix_11}}.131 timers 10 30
+ neighbor 172.16.9.0 remote-as 65130
+ neighbor 172.16.9.0 description seavvvpn01
+ neighbor 172.16.9.0 ebgp-multihop 2
+ neighbor 172.16.9.0 update-source Loopback1
+ neighbor 172.16.9.0 soft-reconfiguration inbound
+ neighbor 172.16.9.0 send-community
+ neighbor 172.16.9.0 route-map tunnel-a-in in
+ neighbor 172.16.9.0 route-map tunnel-a-out out
+ neighbor 172.16.9.0 timers 10 30
+ neighbor {{mpls_a_bgp_remote_ip}} remote-as {{mpls_a_as_number}}
+ neighbor {{mpls_a_bgp_remote_ip}} filter-list 99 out
+ neighbor {{mpls_a_bgp_remote_ip}} description {{mpls_a_neighbor_desc}}
+ neighbor {{mpls_a_bgp_remote_ip}} soft-reconfiguration inbound
+ neighbor {{mpls_a_bgp_remote_ip}} send-community
+ neighbor {{mpls_a_bgp_remote_ip}} route-map mpls-a-in in
+ neighbor {{mpls_a_bgp_remote_ip}} route-map mpls-a-out out
+!
+snmp-server engineID local 000000090200000196149320
+snmp-server community network RO 10
+snmp-server community N3tM0n!T0r!nG RO 10
+snmp-server community CiScOV01Pn0W RO 10
+snmp-server community N0tiFyAl3Rt view v1default RO
+snmp-server tftp-server-list 10
+snmp-server location {{snmplocation}}
+snmp-server contact Network Operations Center
+snmp-server enable traps snmp authentication
+snmp-server host 159.49.42.33 N0tiFyAl3Rt  snmp
+snmp-server file-transfer access-group 10 protocol tftp
+!
+tacacs server se4vvacs01
+ address ipv4 10.33.130.5
+ key 7 122F0D4F12423D567C2D0B720278702C37
+ timeout 40
+ single-connection
+tacacs server igqvvacs01
+ address ipv4 10.23.130.5
+ key 7 097A4651194C26405D0A2B701A697A0C05
+ timeout 40
+ single-connection
+!
+access-list 10 remark SNMP Access List
+access-list 10 permit 159.49.42.34
+access-list 10 permit 159.49.42.90
+access-list 10 permit 159.49.42.91
+access-list 10 permit 159.49.153.0 0.0.0.255
+access-list 10 permit 10.70.112.124
+access-list 10 permit 159.49.42.77
+access-list 10 permit 10.70.112.135
+access-list 10 permit 10.23.130.0 0.0.0.255
+access-list 10 permit 10.33.130.0 0.0.0.255
+access-list 10 deny   any log
+
+ip access-list standard vty-filter
+ permit 159.49.0.0 0.0.255.255
+ permit 10.0.0.0 0.255.255.255
+ permit 172.16.0.0 0.0.15.255
+ deny   any log
+
+ip access-list extended local-networks
+ 10 permit ip host {{station_net_24_prefix_11}}.164 any
+!
+
+ip nat inside source list local-networks interface GigabitEthernet0/0/1.993 vrf Internet overload
+
+!
+banner motd ^
+*****************************************************************
+* NOTICE  NOTICE            S T O P              NOTICE  NOTICE *
+*              THIS IS A PRIVATE NETWORK DEVICE.                *
+*      AUTHORIZATION IS REQUIRED TO CONNECT TO THIS DEVICE.     *
+* ACTUAL OR ATTEMPTED USE, ACCESS, EXAMINATION OR CONFIGURATION *
+* CHANGE BY ANY UNAUTHORIZED PERSON WILL RESULT IN CRIMINAL AND *
+*     CIVIL PROSECUTION TO THE FULLEST EXTENT OF THE LAW.       *
+*                  N    O    T    I    C    E                   *
+*****************************************************************
+{{sitecode}}-{{mdf_subloc}}-wr-1.alaskaair.com
+^
+!
+line con 0
+ exec-timeout 20 0
+ stopbits 1
+
+line aux 0
+ exec-timeout 20 0
+ stopbits 1
+!
+line vty 0 4
+ exec-timeout 20 0
+ transport input ssh
+ access-class vty-filter in vrf-also
+!
+line vty 5 15
+ exec-timeout 20 0
+ transport input ssh
+ access-class vty-filter in vrf-also
+!
+ntp server 10.70.112.7
+ntp server 159.49.153.7
+!
+!
+! [Begin] Sprint MNS Monitoring Configuration
+!
+!interface Loopback2
+! ip address {{mpls_a_sprint_mns_ip}} 255.255.255.255
+! description Sprint MNS Monitoring Service
+!
+!
+!router bgp {{bgp_as_number}}
+! network {{mpls_a_sprint_mns_ip}} mask 255.255.255.255
+!
+!
+!ip prefix-list pfx-{{sitecode}} seq 97 permit {{mpls_a_sprint_mns_ip}}/32
+!
+!access-list 97 remark ACL applied to the Sprint MNS RO community string
+!access-list 97 permit 199.11.1.0 0.0.0.255
+!access-list 97 permit 199.11.21.0 0.0.0.255
+!
+!snmp-server community SprintsIs0nly RO 97
+!
+! [End] Sprint MNS Monitoring Configuration
+!
+
+! [Begin] DX Enable route
+!
+Note: Do not enable DX unless the station has been DX-approved and prepared. When in doubt, leave this turned off.
+
+!ip route 0.0.0.0 0.0.0.0 {{station_net_24_prefix_11}}.148 track 1 name dx_enabled
+
+!
+! [End] DX Enable route
+
+!
+end
+
+
+
+

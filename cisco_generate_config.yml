@@ -1,0 +1,8 @@
+---
+- name: generate cisco router config
+  hosts: all
+  gather_facts: no
+
+  roles:
+  - network_config
+

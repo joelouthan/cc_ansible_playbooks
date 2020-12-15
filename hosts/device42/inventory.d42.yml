@@ -1,0 +1,10 @@
+plugin: device42.d42.d42
+url: https://10.10.10.10
+username: admin
+password: password
+ssl_check: False
+debug: False
+keyed_groups:
+    - key: d42_service_level
+      prefix: ''
+      separator: ''
