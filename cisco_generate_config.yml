@@ -1,7 +1,8 @@
 ---
 - name: generate cisco router config
-  hosts: all
-  gather_facts: no
+  hosts: localhost
+  connection: local
+  gather_facts: yes
 
   roles:
   - network_config

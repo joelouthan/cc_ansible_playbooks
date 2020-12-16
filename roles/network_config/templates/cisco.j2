@@ -1,7 +1,7 @@
 vlan {{ vlan_id }}
-  name {{ aws_acct_name }}#{{ aws_acct_num}}
+  name {{ aws_acct_name }}#{{ aws_acct_num }}
 interface port-channel20.{{ vlan_id }} build
-  description {{ aws_acct_name }}#{{ aws_acct_num}} build
+  description {{ aws_acct_name }}#{{ aws_acct_num }} build
   encapsulation dot1q {{ vlan_id }} build
   bfd interval 300 min_rx 300 multiplier 3
   ip address {{ ip_address_bgp }}
@@ -31,8 +31,8 @@ route-map {{ aws_acct_shortname }}-OUTBOUND permit 5
   set community {{ community }}
 router bgp 26558
  neighbor {{ neighbor }}
-   remote-as {{ remote-as }}
-    password {{ remote-as_password }}
+   remote-as {{ remote_as }}
+    password {{ remote_as_password }}
     address-family ipv4 unicast
       send-community
       route-map {{ aws_acct_shortname }}-INBOUND in

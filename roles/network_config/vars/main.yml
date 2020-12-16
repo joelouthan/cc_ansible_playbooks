@@ -1,0 +1,10 @@
+vlan_id: 670
+aws_acct_name: "AF-DEV-DATABRICKS-AWS_Account"
+aws_acct_shortname: "AWS-AF-DEV-DATABRICKS"
+aws_acct_num: 441707470931
+ip_address_bgp: "100.64.250.5/30"
+ip_address_bgp_to_eigrp: "10.57.32.0/23"
+community: "7224:7300"
+neighbor: "100.64.250.6"
+remote_as: 7224
+remote_as_password: some-password
