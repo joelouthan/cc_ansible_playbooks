@@ -1,7 +1,7 @@
 ---
 #- name: create git repo
 #  git:
-#    repo: https://{{ gitusername | urlencode }}:{{ gitpassword }}@dev.azure.com/itsals/Network%20Engineering/_git/Tower
+#    repo: https://{{ gitusername | urlencode }}:{{ gitpassword }}@{{ git_url }}
 #    dest: /var/tmp/tower-config-repo
 #    update: yes
 #    version: master
