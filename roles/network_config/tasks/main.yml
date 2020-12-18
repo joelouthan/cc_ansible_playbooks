@@ -1,40 +1,11 @@
 ---
-#- name: create git repo
-#  git:
-#    repo: https://{{ gitusername | urlencode }}:{{ gitpassword }}@dev.azure.com/itsals/Network%20Engineering/_git/Tower
-#    dest: /var/tmp/tower-config-repo
-#    update: yes
-#    version: master
-
 - name: Ensure that the /var/tmp/tower-config-repo directory is present
   file:
       path: /var/tmp/tower-config-repo/configs
       state: directory
 
-#- name: create {{ device_os }} configuration file
-#  template:
-#    src: templates/{{ device_os }}.j2
-#    dest: /var/tmp/tower-config-repo/configs/{{ device_os }}-{{ ansible_date_time.iso8601_basic_short }}.conf
-
 - name: generate {{ ansible_network_os }} config file
   template:
     src: templates/{{ ansible_network_os }}.j2
     dest: /var/tmp/configs/{{ ansible_network_os }}/ios_template.j2
-
-#- name: add template to git
-#  command: "git add --all"
-#  args:
-#    chdir: /var/tmp/tower-config-repo/
-#  register: gitadd
-
-#- name: commit to git
-#  command: git commit -a -m "added config for {{ device_os }}-{{ ansible_date_time.date }}-{{ #ansible_date_time.time }}"
-#  args:
-#    chdir: /var/tmp/tower-config-repo/
-#  register: gitcommit
-
-#- name: push to git
-#  command: git push
-#  args:
-#    chdir: /var/tmp/tower-config-repo/
-#  register: gitpush
+...
