@@ -4,8 +4,6 @@
   connection: local
   gather_facts: yes
 
-  roles
-
   roles: network_config
   from_tasks: backup_config
 ...
