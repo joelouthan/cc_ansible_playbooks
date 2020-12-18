@@ -1,0 +1,10 @@
+---
+- name: backup device configs
+  cisco.ios.ios_config:
+    src: /var/tmp/configs/{{ ansible_network_os }}/ios_template.j2
+    backup: yes
+    backup_options:
+#     filename: {{ ansible_hostname }}.cfg
+      filename: cisco_switch_670.cfg
+      dir_path: /var/tmp/backups/{{ ansible_network_os }}/
+...

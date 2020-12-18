@@ -11,10 +11,15 @@
       path: /var/tmp/tower-config-repo/configs
       state: directory
 
-- name: create {{ device_os }} configuration file
+#- name: create {{ device_os }} configuration file
+#  template:
+#    src: templates/{{ device_os }}.j2
+#    dest: /var/tmp/tower-config-repo/configs/{{ device_os }}-{{ ansible_date_time.iso8601_basic_short }}.conf
+
+- name: generate {{ ansible_network_os }} config file
   template:
-    src: templates/{{ device_os }}.j2
-    dest: /var/tmp/tower-config-repo/configs/{{ device_os }}-{{ ansible_date_time.iso8601_basic_short }}.conf
+    src: templates/{{ ansible_network_os }}.j2
+    dest: /var/tmp/configs/{{ ansible_network_os }}/ios_template.j2
 
 #- name: add template to git
 #  command: "git add --all"

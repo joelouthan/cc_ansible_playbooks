@@ -1,0 +1,11 @@
+---
+- name: generate cisco router config
+  hosts: localhost
+  connection: local
+  gather_facts: yes
+
+  roles
+
+  roles: network_config
+  from_tasks: backup_config
+...
